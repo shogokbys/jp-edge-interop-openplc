@@ -294,7 +294,7 @@ spec:
     metadata:
       labels:
         app: openplc
-        app.kubernetes.io/version: "3.0.0"
+        app.kubernetes.io/version: "3.0.1"
     spec:
       containers:
         - name: openplc
