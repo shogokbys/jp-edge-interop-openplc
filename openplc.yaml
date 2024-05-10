@@ -1,0 +1,337 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plc
+  labels:
+    name: plc
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openplc-st-cm
+  namespace: plc
+  labels:
+    app.kubernetes.io/name: openplc-st-cm
+data:
+  script.st: |
+    PROGRAM program0
+      VAR
+        sensor_1 AT %IX100.0 : BOOL;
+        pusher_1_front AT %IX100.1 : BOOL;
+        pusher_1_back AT %IX100.2 : BOOL;
+        pusher_1_exit AT %IX100.3 : BOOL;
+        sensor_2 AT %IX100.4 : BOOL;
+        pusher_2_front AT %IX100.5 : BOOL;
+        pusher_2_back AT %IX100.6 : BOOL;
+        pusher_2_exit AT %IX100.7 : BOOL;
+        start_button AT %IX101.0 : BOOL;
+        reset_button AT %IX101.1 : BOOL;
+        stop_button AT %IX101.2 : BOOL;
+        vision_sensor_1 AT %IW100 : INT;
+        vision_sensor_2 AT %IW101 : INT;
+        entry_conveyor_1 AT %QX100.0 : BOOL;
+        pusher_1 AT %QX100.1 : BOOL;
+        conveyor_1 AT %QX100.2 : BOOL;
+        entry_conveyor_2 AT %QX100.3 : BOOL;
+        pusher_2 AT %QX100.4 : BOOL;
+        conveyor_2 AT %QX100.5 : BOOL;
+        start_light AT %QX100.6 : BOOL;
+        reset_light AT %QX100.7 : BOOL;
+        stop_light AT %QX101.0 : BOOL;
+        counter_1 AT %QW100 : INT;
+        counter_2 AT %QW101 : INT;
+        pattern_1 AT %QX80.1 : BOOL;
+        pattern_2 AT %QX80.2 : BOOL;
+        pattern_3 AT %QX80.3 : BOOL;
+        pusher_1_done AT %QX80.4 : BOOL;
+        pusher_2_done AT %QX80.5 : BOOL;
+      END_VAR
+      VAR
+        _TMP_EQ37_OUT : BOOL;
+        _TMP_EQ2_OUT : BOOL;
+        _TMP_EQ42_OUT : BOOL;
+        _TMP_EQ49_OUT : BOOL;
+        _TMP_AND98_OUT : BOOL;
+        F_TRIG1 : F_TRIG;
+        F_TRIG2 : F_TRIG;
+        F_TRIG3 : F_TRIG;
+        F_TRIG4 : F_TRIG;
+        F_TRIG5 : F_TRIG;
+        F_TRIG6 : F_TRIG;
+        F_TRIG7 : F_TRIG;
+        F_TRIG8 : F_TRIG;
+        F_TRIG9 : F_TRIG;
+        F_TRIG10 : F_TRIG;
+        F_TRIG11 : F_TRIG;
+        F_TRIG12 : F_TRIG;
+        F_TRIG13 : F_TRIG;
+        F_TRIG14 : F_TRIG;
+      END_VAR
+
+      IF start_button THEN
+        start_light := TRUE; (*set*)
+      END_IF;
+      IF start_button THEN
+        stop_light := FALSE; (*reset*)
+      END_IF;
+      IF start_button THEN
+        reset_light := FALSE; (*reset*)
+      END_IF;
+      IF start_button THEN
+        entry_conveyor_1 := TRUE; (*set*)
+      END_IF;
+      IF start_button THEN
+        entry_conveyor_2 := TRUE; (*set*)
+      END_IF;
+      IF start_button THEN
+        conveyor_1 := TRUE; (*set*)
+      END_IF;
+      IF start_button THEN
+        conveyor_2 := TRUE; (*set*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        start_light := FALSE; (*reset*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        stop_light := TRUE; (*set*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        reset_light := FALSE; (*reset*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        entry_conveyor_1 := FALSE; (*reset*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        entry_conveyor_2 := FALSE; (*reset*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        conveyor_1 := FALSE; (*reset*)
+      END_IF;
+      IF NOT(stop_button) THEN
+        conveyor_2 := FALSE; (*reset*)
+      END_IF;
+      IF reset_button THEN
+        start_light := TRUE; (*set*)
+      END_IF;
+      IF reset_button THEN
+        stop_light := FALSE; (*reset*)
+      END_IF;
+      IF reset_button THEN
+        reset_light := FALSE; (*reset*)
+      END_IF;
+      IF reset_button THEN
+        entry_conveyor_1 := TRUE; (*set*)
+      END_IF;
+      IF reset_button THEN
+        entry_conveyor_2 := TRUE; (*set*)
+      END_IF;
+      IF reset_button THEN
+        conveyor_1 := TRUE; (*set*)
+      END_IF;
+      IF reset_button THEN
+        conveyor_2 := TRUE; (*set*)
+      END_IF;
+      _TMP_EQ37_OUT := EQ(vision_sensor_1, 4);
+      IF _TMP_EQ37_OUT THEN
+        pattern_1 := TRUE; (*set*)
+      END_IF;
+      _TMP_EQ2_OUT := EQ(vision_sensor_2, 1);
+      IF _TMP_EQ2_OUT THEN
+        pattern_2 := TRUE; (*set*)
+      END_IF;
+      _TMP_EQ42_OUT := EQ(vision_sensor_1, 4);
+      _TMP_EQ49_OUT := EQ(vision_sensor_2, 1);
+      _TMP_AND98_OUT := AND(_TMP_EQ42_OUT, _TMP_EQ49_OUT);
+      IF _TMP_AND98_OUT THEN
+        pattern_3 := TRUE; (*set*)
+      END_IF;
+      IF pattern_1 THEN
+        entry_conveyor_2 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG1(CLK := sensor_1);
+      IF F_TRIG1.Q AND pattern_1 THEN
+        conveyor_1 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG2(CLK := sensor_1);
+      IF F_TRIG2.Q AND pattern_1 THEN
+        entry_conveyor_1 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG3(CLK := sensor_1);
+      IF pusher_1_back AND F_TRIG3.Q AND pattern_1 THEN
+        pusher_1 := TRUE; (*set*)
+      END_IF;
+      IF pusher_1_done THEN
+        pattern_1 := FALSE; (*reset*)
+      END_IF;
+      IF pusher_1_done THEN
+        pattern_3 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG4(CLK := pusher_2_exit);
+      IF F_TRIG4.Q AND pusher_1_done THEN
+        entry_conveyor_1 := TRUE; (*set*)
+      END_IF;
+      F_TRIG5(CLK := pusher_2_exit);
+      IF F_TRIG5.Q AND pusher_1_done THEN
+        entry_conveyor_2 := TRUE; (*set*)
+      END_IF;
+      F_TRIG6(CLK := pusher_2_exit);
+      IF F_TRIG6.Q AND pusher_1_done THEN
+        conveyor_1 := TRUE; (*set*)
+      END_IF;
+      IF pusher_1_front THEN
+        pusher_1 := FALSE; (*reset*)
+      END_IF;
+      IF pusher_1_front THEN
+        pusher_1_done := TRUE; (*set*)
+      END_IF;
+      F_TRIG7(CLK := pusher_2_exit);
+      IF F_TRIG7.Q AND pusher_1_done THEN
+        pusher_1_done := FALSE; (*reset*)
+      END_IF;
+      IF pattern_2 THEN
+        entry_conveyor_1 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG8(CLK := sensor_2);
+      IF F_TRIG8.Q AND pattern_2 THEN
+        conveyor_2 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG9(CLK := sensor_2);
+      IF F_TRIG9.Q AND pattern_2 THEN
+        entry_conveyor_2 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG10(CLK := sensor_2);
+      IF pusher_2_back AND F_TRIG10.Q AND pattern_2 THEN
+        pusher_2 := TRUE; (*set*)
+      END_IF;
+      IF pusher_2_done THEN
+        pattern_2 := FALSE; (*reset*)
+      END_IF;
+      F_TRIG11(CLK := pusher_1_exit);
+      IF F_TRIG11.Q AND pusher_2_done THEN
+        entry_conveyor_1 := TRUE; (*set*)
+      END_IF;
+      F_TRIG12(CLK := pusher_1_exit);
+      IF F_TRIG12.Q AND pusher_2_done THEN
+        entry_conveyor_2 := TRUE; (*set*)
+      END_IF;
+      F_TRIG13(CLK := pusher_1_exit);
+      IF F_TRIG13.Q AND pusher_2_done THEN
+        conveyor_2 := TRUE; (*set*)
+      END_IF;
+      IF pusher_2_front THEN
+        pusher_2 := FALSE; (*reset*)
+      END_IF;
+      IF pusher_2_front THEN
+        pusher_2_done := TRUE; (*set*)
+      END_IF;
+      F_TRIG14(CLK := pusher_1_exit);
+      IF F_TRIG14.Q AND pusher_2_done THEN
+        pusher_2_done := FALSE; (*reset*)
+      END_IF;
+    END_PROGRAM
+
+
+    CONFIGURATION Config0
+
+      RESOURCE Res0 ON PLC
+        TASK task0(INTERVAL := T#20ms,PRIORITY := 0);
+        PROGRAM instance0 WITH task0 : program0;
+      END_RESOURCE
+    END_CONFIGURATION
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openplc-mbconfig-cm
+  namespace: plc
+  labels:
+    app.kubernetes.io/name: openplc-mbconfig-cm
+data:
+  mbconfig.cfg: |
+    Num_Devices = "1"
+    Polling_Period = "100"
+    Timeout = "1000"
+    # ------------
+    #   DEVICE 0
+    # ------------
+    device0.name = "FACTORYIO"
+    device0.slave_id = "1"
+    device0.protocol = "TCP"
+    device0.address = "192.168.50.10"
+    device0.IP_Port = "502"
+    device0.RTU_Baud_Rate = "115200"
+    device0.RTU_Parity = "None"
+    device0.RTU_Data_Bits = "8"
+    device0.RTU_Stop_Bits = "1"
+    device0.RTU_TX_Pause = "0"
+    
+    device0.Discrete_Inputs_Start = "0"
+    device0.Discrete_Inputs_Size = "13"
+    device0.Coils_Start = "0"
+    device0.Coils_Size = "9"
+    device0.Input_Registers_Start = "0"
+    device0.Input_Registers_Size = "2"
+    device0.Holding_Registers_Read_Start = "0"
+    device0.Holding_Registers_Read_Size = "0"
+    device0.Holding_Registers_Start = "0"
+    device0.Holding_Registers_Size = "0"
+
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openplc
+  namespace: plc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openplc
+  template:
+    metadata:
+      labels:
+        app: openplc
+        app.kubernetes.io/version: "3.0.0"
+    spec:
+      containers:
+        - name: openplc
+          image: shogokobayashi/openplc:latest
+          ports:
+            - name: modbus
+              containerPort: 502
+              protocol: TCP
+            - name: webui
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/openplc/OpenPLC_v3/webserver/st_files/script.st
+              subPath: script.st
+              name: st-file
+            - mountPath: /home/openplc/OpenPLC_v3/webserver/mbconfig.cfg
+              subPath: mbconfig.cfg
+              name: mbconfig-file
+      volumes:
+        - name: st-file
+          configMap:
+            name: openplc-st-cm
+        - name: mbconfig-file
+          configMap:
+            name: openplc-mbconfig-cm
+          
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openplc-webui
+  namespace: plc
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30080
+  selector:
+    app: openplc
