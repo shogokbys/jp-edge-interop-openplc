@@ -132,11 +132,11 @@ data:
       IF reset_button THEN
         conveyor_2 := TRUE; (*set*)
       END_IF;
-      _TMP_EQ37_OUT := EQ(vision_sensor_1, 4);
+      _TMP_EQ37_OUT := EQ(vision_sensor_1, 1);
       IF _TMP_EQ37_OUT THEN
         pattern_1 := TRUE; (*set*)
       END_IF;
-      _TMP_EQ2_OUT := EQ(vision_sensor_2, 1);
+      _TMP_EQ2_OUT := EQ(vision_sensor_2, 4);
       IF _TMP_EQ2_OUT THEN
         pattern_2 := TRUE; (*set*)
       END_IF;
@@ -294,7 +294,7 @@ spec:
     metadata:
       labels:
         app: openplc
-        app.kubernetes.io/version: "3.0.3"
+        app.kubernetes.io/version: "3.0.4"
     spec:
       containers:
         - name: openplc
