@@ -294,11 +294,12 @@ spec:
     metadata:
       labels:
         app: openplc
-        app.kubernetes.io/version: "3.0.1"
+        app.kubernetes.io/version: "3.0.2"
     spec:
       containers:
         - name: openplc
           image: shogokobayashi/openplc:latest
+          imagePullPolicy: Always
           ports:
             - name: modbus
               containerPort: 502
